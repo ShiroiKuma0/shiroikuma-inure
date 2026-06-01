@@ -49,6 +49,8 @@ class PreferencesViewModel(application: Application) : WrappedViewModel(applicat
                 list.add(Pair(0, 0)) // Divider
             }
 
+            list.add(Pair(R.drawable.ic_colors, R.string.shiroikuma_inure_ui)) // Fork: 白い熊 Inure UI (fonts + Custom-theme colours)
+            list.add(Pair(0, 0)) // Divider
             list.add(Pair(R.drawable.ic_appearance, R.string.appearance))
             list.add(Pair(R.drawable.ic_behaviour, R.string.behavior))
             list.add(Pair(R.drawable.ic_app_settings, R.string.configuration))

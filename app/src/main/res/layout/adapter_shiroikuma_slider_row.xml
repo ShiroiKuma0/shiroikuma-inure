@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <app.simple.inure.decorations.typeface.TypeFaceTextView
+        android:id="@+id/slider_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="22dp"
+        app:appFontStyle="bold"
+        app:textColorStyle="primary" />
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/slider_seek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_weight="1"
+        android:max="255" />
+
+    <app.simple.inure.decorations.typeface.TypeFaceTextView
+        android:id="@+id/slider_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="40dp"
+        android:gravity="end"
+        app:appFontStyle="regular"
+        app:textColorStyle="secondary" />
+
+</LinearLayout>

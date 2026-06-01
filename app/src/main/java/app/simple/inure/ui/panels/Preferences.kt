@@ -40,6 +40,7 @@ import app.simple.inure.preferences.DevelopmentPreferences
 import app.simple.inure.ui.preferences.mainscreens.AboutScreen
 import app.simple.inure.ui.preferences.mainscreens.AccessibilityScreen
 import app.simple.inure.ui.preferences.mainscreens.AppearanceScreen
+import app.simple.inure.ui.preferences.mainscreens.ShiroikumaUIScreen
 import app.simple.inure.ui.preferences.mainscreens.BehaviourScreen
 import app.simple.inure.ui.preferences.mainscreens.ConfigurationScreen
 import app.simple.inure.ui.preferences.mainscreens.DevelopmentScreen
@@ -97,6 +98,10 @@ class Preferences : SearchBarScopedFragment() {
             adapterPreferences.setOnPreferencesCallbackListener(object : PreferencesCallbacks {
                 override fun onPrefsClicked(imageView: ImageView, category: Int, position: Int) {
                     when (category) {
+                        R.string.shiroikuma_inure_ui -> {
+                            openFragmentLinear(ShiroikumaUIScreen.newInstance(), imageView, ShiroikumaUIScreen.TAG)
+                        }
+
                         R.string.appearance -> {
                             openFragmentLinear(AppearanceScreen.newInstance(), imageView, AppearanceScreen.TAG)
                         }

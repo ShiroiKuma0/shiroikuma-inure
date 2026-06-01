@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <app.simple.inure.decorations.typeface.TypeFaceTextView
+        android:id="@+id/element_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="2dp"
+        app:appFontStyle="bold"
+        app:textColorStyle="primary" />
+
+    <app.simple.inure.decorations.ripple.DynamicRippleLinearLayout
+        android:id="@+id/row_font"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="120dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="10dp">
+
+        <app.simple.inure.decorations.typeface.TypeFaceTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/custom_font_family"
+            app:appFontStyle="regular"
+            app:textColorStyle="secondary" />
+
+        <app.simple.inure.decorations.typeface.TypeFaceTextView
+            android:id="@+id/font_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:ellipsize="end"
+            android:maxWidth="180dp"
+            android:singleLine="true"
+            app:appFontStyle="medium"
+            app:textColorStyle="primary" />
+
+    </app.simple.inure.decorations.ripple.DynamicRippleLinearLayout>
+
+    <app.simple.inure.decorations.ripple.DynamicRippleLinearLayout
+        android:id="@+id/row_weight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="120dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="10dp">
+
+        <app.simple.inure.decorations.typeface.TypeFaceTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/custom_font_weight"
+            app:appFontStyle="regular"
+            app:textColorStyle="secondary" />
+
+        <app.simple.inure.decorations.typeface.TypeFaceTextView
+            android:id="@+id/weight_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:appFontStyle="medium"
+            app:textColorStyle="primary" />
+
+    </app.simple.inure.decorations.ripple.DynamicRippleLinearLayout>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/weight_seek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="116dp"
+        android:layout_marginEnd="20dp"
+        android:max="6" />
+
+    <app.simple.inure.decorations.ripple.DynamicRippleLinearLayout
+        android:id="@+id/row_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="120dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="4dp">
+
+        <app.simple.inure.decorations.typeface.TypeFaceTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/custom_font_size"
+            app:appFontStyle="regular"
+            app:textColorStyle="secondary" />
+
+        <app.simple.inure.decorations.typeface.TypeFaceTextView
+            android:id="@+id/size_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:appFontStyle="medium"
+            app:textColorStyle="primary" />
+
+    </app.simple.inure.decorations.ripple.DynamicRippleLinearLayout>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/size_seek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="116dp"
+        android:layout_marginEnd="20dp"
+        android:max="400" />
+
+    <!-- Plain text view: the screen sets its typeface/size/colour directly so it isn't overwritten by the
+         font-preference listener (which would re-apply this view's own role font). -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="120dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="6dp"
+        android:text="@string/custom_font_preview_text" />
+
+</LinearLayout>

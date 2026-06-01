@@ -141,6 +141,15 @@ class Installer : ScopedFragment(), InstallerCallbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Fork (白い熊 Inure UI): apply installer-scoped font/colour overrides to this screen's items.
+        app.simple.inure.util.ShiroikumaInstallerStyle.apply(
+                view, name, packageName, version, listOf(install, cancel, update, launch, uninstall))
+        // Re-tint the background each time a (lazily-created) tab page is shown.
+        viewPager.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                view.post { app.simple.inure.util.ShiroikumaInstallerStyle.tintBackground(view) }
+            }
+        })
         if (requireActivity() is MainActivity) {
             showLoader(manualOverride = true)
         }
