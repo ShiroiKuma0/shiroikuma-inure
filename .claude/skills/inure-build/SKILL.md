@@ -117,9 +117,14 @@ Required for side-by-side install (see "Side-by-side install" above). Three file
 
 Symptom if this regresses on a rebase: `INSTALL_FAILED_DUPLICATE_PERMISSION: … already owned by app.simple.inure[.play]`.
 
-### Future feature commits
+### Implemented feature commits (on top of commit 1)
 
-Append small, surgical commits on top of commit 1 so rebases stay trivial; `namespace` stays unchanged in all of them. Document notable ones here as the stack grows (mirroring how the appmanager / futokxkb skills list their feature commits).
+Append small, surgical commits; `namespace` stays unchanged in all of them. The stack so far:
+
+- **`Always enable full version`** — `preferences/TrialPreferences` forced (Play unlocker is package/signature-bound to the official app, so it can't activate this fork). All `var` returns; trivial to re-derive.
+- **白い熊 Inure UI** (several commits) — the fork's UI-customization hub. New files: `ui/preferences/mainscreens/ShiroikumaUIScreen.kt`, `preferences/Shiroikuma{Font,Installer,UI}Preferences.kt`, `themes/data/CustomTheme.kt`, `util/ShiroikumaInstallerStyle.kt`, `dialogs/appearance/{RoleColorPicker,FontFamilyPicker}.kt`, + `res/layout/adapter_shiroikuma_*.xml` / `dialog_*picker*.xml` / `preferences_shiroikuma_ui.xml`. See CLAUDE.md → "白い熊 Inure UI" for what each section does.
+
+**Rebase watch-points** (upstream files the feature edits — keep diffs minimal, expect occasional conflicts): `decorations/typeface/TypeFaceTextView.kt` (per-role font apply), `util/TypeFace.kt` (file/weight resolver), `adapters/ui/AdapterHome.kt` (main-screen icon/label styling), `adapters/preferences/AdapterTheme.kt` (+CUSTOM), `themes/manager/{Theme,ThemeManager,ThemeUtils}.kt` + `themes/data/{TextView,ViewGroup,Icon,SwitchView}Theme.kt` (made `var`; CUSTOM entry), `ui/panels/Installer.kt` (apply installer style), `ui/panels/Preferences.kt` + `viewmodels/panels/PreferencesViewModel.kt` (top entry/nav), `decorations/typeface`/manifests/`terminal/Term.java` (commit 3 permissions). If upstream restructures any of these subsystems, treat it as a "significant" conflict (see `upstream-new-version`) and re-derive rather than force-merge.
 
 ## Versioning (local counter + `-P` injection — no commit needed)
 

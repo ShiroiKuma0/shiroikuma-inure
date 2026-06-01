@@ -11,6 +11,28 @@ This repo is **白い熊's customized fork** of Hamza417/Inure — package `shir
 
 Standing rules: namespace stays `app.simple.inure` (never changed); build the **`github`** flavor; **never `git push` to GitHub or `adb push` to the phone without the user's explicit go-ahead**. The sections below document the upstream codebase architecture.
 
+## Fork customizations (the `custom` branch)
+
+Commits layered over the upstream release tag (the `inure-build` skill documents them in full for rebase-conflict resolution; this is the quick map):
+
+1. **Side-by-side identity** — `applicationId shiroikuma.inure`, label `白い熊 Inure`, arm64-only ABI, `-P`-driven version + NDK (`app/build.gradle`, `res/values/non_translatable_string.xml`).
+2. **Terminal permissions namespaced** per `${applicationId}` — avoids `INSTALL_FAILED_DUPLICATE_PERMISSION` against the official app (both manifests + `terminal/Term.java`).
+3. **Always full version** — decoupled from the package-bound Play unlocker (`preferences/TrialPreferences`).
+4. **Claude Code skills + this doc**; the build invokes `sh ./gradlew` (gradlew is committed non-executable).
+5. **白い熊 Inure UI** — the fork's UI-customization hub (below).
+
+### 白い熊 Inure UI (Preferences → top entry, before Appearance)
+
+A programmatically-built, grouped + deeply-indented screen — `ui/preferences/mainscreens/ShiroikumaUIScreen.kt` (entry wired in `viewmodels/panels/PreferencesViewModel` + `ui/panels/Preferences`). Sections:
+
+- **Typeface** — per text-role fonts (Default + heading/primary/secondary/tertiary/quaternary, cascading role→Default→inherit): family (bundled + imported `.ttf`/`.otf` via SAF, long-press to remove), weight slider, 50–400% size. Store `preferences/ShiroikumaFontPreferences` (`sfont_` keys); resolved + applied **live** in `decorations/typeface/TypeFaceTextView` via `util/TypeFace` (external `file:` loading + weight synthesis). Chooser: `dialogs/appearance/FontFamilyPicker`.
+- **Main screen** — Home dashboard feature items (`adapters/ui/AdapterHome`): icon size (≤300% of designed size) + icon colour, and label font/weight/size + colour. Store `preferences/ShiroikumaUIPreferences` (`sui_main*`); base icon/text sizes captured at holder creation (recycling-safe).
+- **Colours (Custom theme)** — the user-overridable `Theme.CUSTOM` (`themes/data/CustomTheme.kt`, seeded from Dark, **mutated in place** then `ThemeManager.refreshTheme()` recolours live): every theme role + global accent. `constants/ThemeConstants.CUSTOM`, mapped in `themes/manager/ThemeUtils`, listed in `adapters/preferences/AdapterTheme`. The theme data classes (`themes/data/*Theme.kt`) were made `var` for this.
+- **Installer screen** — the install-an-APK screen (`ui/panels/Installer`): per-item (name/package/version/buttons) font/size/colour + screen background. Store `preferences/ShiroikumaInstallerPreferences` (`sinst_`); applied by `util/ShiroikumaInstallerStyle` (recolours the real surfaces, re-tinted on tab change).
+- **Colour picker** — `dialogs/appearance/RoleColorPicker`: giant hue circle, previously-picked colour dots over it, R/G/B/A sliders, hex + preview, OK.
+
+When editing upstream files that the fork touches (`TypeFaceTextView`, `AdapterHome`, `AdapterTheme`, `ThemeUtils`/`Theme`/`ThemeManager` + `themes/data/*`, `Installer.kt`, `Preferences.kt`/`PreferencesViewModel`), keep changes small — these are the rebase watch-points.
+
 ## Project
 
 **Inure App Manager** — an Android app/package manager (view, modify, install, debloat, inspect any APK whether installed or not). Single-developer project, ~250K LOC, GPL v3. Application ID `app.simple.inure`. Written in Kotlin with some Java and a native C++ terminal emulator. Almost the entire UI stack is custom (theme engine, animation framework, crash handler, image rendering) rather than off-the-shelf — there is **no Jetpack Compose, no data binding, and `viewBinding` is disabled**; views are wired with `findViewById`/custom decorations.
