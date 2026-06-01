@@ -51,12 +51,20 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.simple.inure"
+        applicationId "shiroikuma.inure"
         minSdkVersion 23
         targetSdkVersion 36
-        versionCode 10702
-        versionName "build107.0.2"
+        // Fork versioning (shiroikuma): the inure-build / upstream-new-version skills inject
+        // -PshiroikumaVersionName / -PshiroikumaVersionCode at the gradlew call (build number N
+        // lives in ~/tmp/.shiroikuma_inure_build). The fallbacks below are only used by a bare
+        // build (e.g. Android Studio) and are intentionally NOT kept in sync with the tracked tag.
+        versionCode((project.findProperty('shiroikumaVersionCode') ?: '107020000').toString().toInteger())
+        versionName(project.findProperty('shiroikumaVersionName') ?: 'build107.0.2+0')
         vectorDrawables.useSupportLibrary = true
+        // Fork: build the native terminal lib for arm64 only -> single deterministic APK, faster CMake.
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // buildConfigField 'string', "VIRUS_TOTAL_API_KEY", "${properties.getProperty("VIRUS_TOTAL_API_KEY").toString()}"
@@ -176,7 +184,9 @@ android {
         }
     }
 
-    ndkVersion = '29.0.13599879 rc2'
+    // Fork: -PshiroikumaNdk overrides the pinned RC NDK with a locally-installed one
+    // (upstream pins an unreleased RC; see the inure-build skill's "NDK" note).
+    ndkVersion = project.findProperty('shiroikumaNdk') ?: '29.0.13599879 rc2'
     namespace = 'app.simple.inure'
 
     tasks.register('generateVersionTxt') {

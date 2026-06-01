@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Inure</string>
+    <string name="app_name" translatable="false">白い熊 Inure</string>
     <string name="app_name_full" translatable="false">Inure App Manager</string>
     <string name="mini_player_name" translatable="false">Inure Mini Player</string>
     <string name="dex_classes" translatable="false">Dex Classes</string>
