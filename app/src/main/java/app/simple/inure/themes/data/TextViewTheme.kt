@@ -13,8 +13,8 @@ data class TextViewTheme(
         var secondaryTextColor: Int,
 
         @ColorInt
-        val tertiaryTextColor: Int,
+        var tertiaryTextColor: Int,
 
         @ColorInt
-        val quaternaryTextColor: Int,
+        var quaternaryTextColor: Int,
 )

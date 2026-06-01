@@ -4,5 +4,5 @@ import androidx.annotation.ColorInt
 
 data class SwitchViewTheme(
         @ColorInt
-        val switchOffColor: Int,
+        var switchOffColor: Int,
 )

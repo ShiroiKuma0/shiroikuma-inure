@@ -4,8 +4,8 @@ import androidx.annotation.ColorInt
 
 data class IconTheme(
         @ColorInt
-        val regularIconColor: Int,
+        var regularIconColor: Int,
 
         @ColorInt
-        val secondaryIconColor: Int
+        var secondaryIconColor: Int
 )

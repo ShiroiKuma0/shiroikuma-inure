@@ -35,6 +35,7 @@ class AdapterTheme : RecyclerView.Adapter<VerticalListViewHolder>() {
                 ThemeConstants.SLATE,
                 ThemeConstants.OIL,
                 ThemeConstants.HIGH_CONTRAST,
+                ThemeConstants.CUSTOM,
                 -1, // Auto
                 ThemeConstants.FOLLOW_SYSTEM,
                 ThemeConstants.DAY_NIGHT,
@@ -51,6 +52,7 @@ class AdapterTheme : RecyclerView.Adapter<VerticalListViewHolder>() {
                 ThemeConstants.SLATE,
                 ThemeConstants.OIL,
                 ThemeConstants.HIGH_CONTRAST,
+                ThemeConstants.CUSTOM,
                 -1, // Auto
                 ThemeConstants.FOLLOW_SYSTEM,
                 ThemeConstants.DAY_NIGHT,
@@ -112,6 +114,7 @@ class AdapterTheme : RecyclerView.Adapter<VerticalListViewHolder>() {
                             ThemeConstants.SLATE,
                             ThemeConstants.AMOLED,
                             ThemeConstants.OIL,
+                            ThemeConstants.CUSTOM,
                             ThemeConstants.MATERIAL_YOU_DARK -> {
                                 AppearancePreferences.setLastDarkTheme(list[position])
                             }
@@ -160,6 +163,7 @@ class AdapterTheme : RecyclerView.Adapter<VerticalListViewHolder>() {
             ThemeConstants.DAY_NIGHT -> getString(R.string.day_night)
             ThemeConstants.MATERIAL_YOU_LIGHT -> getString(R.string.material_you_light)
             ThemeConstants.MATERIAL_YOU_DARK -> getString(R.string.material_you_dark)
+            ThemeConstants.CUSTOM -> getString(R.string.custom_theme)
             else -> getString(R.string.unknown)
         }
     }

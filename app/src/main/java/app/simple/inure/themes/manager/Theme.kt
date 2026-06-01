@@ -246,5 +246,17 @@ enum class Theme(val textViewTheme: TextViewTheme,
                     regularIconColor = MaterialYou.regularIconColorDark,
                     secondaryIconColor = MaterialYou.secondaryIconColorDark
             )
+    ),
+
+    /**
+     * Fork (白い熊 Inure UI): a fully user-overridable theme. It deliberately reuses the SAME mutable data
+     * instances held by [CustomTheme], so editing a colour there + [ThemeManager.refreshTheme] recolours the
+     * whole UI live. Seeded from [DARK].
+     */
+    CUSTOM(
+            textViewTheme = CustomTheme.textViewTheme,
+            viewGroupTheme = CustomTheme.viewGroupTheme,
+            switchViewTheme = CustomTheme.switchViewTheme,
+            iconTheme = CustomTheme.iconTheme
     )
 }

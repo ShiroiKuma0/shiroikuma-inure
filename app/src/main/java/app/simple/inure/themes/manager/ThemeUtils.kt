@@ -11,6 +11,7 @@ import app.simple.inure.R
 import app.simple.inure.constants.ThemeConstants
 import app.simple.inure.preferences.AppearancePreferences
 import app.simple.inure.preferences.DevelopmentPreferences
+import app.simple.inure.themes.data.CustomTheme
 import app.simple.inure.themes.data.MaterialYou
 import app.simple.inure.util.CalendarUtils
 
@@ -133,6 +134,10 @@ object ThemeUtils {
             ThemeConstants.MATERIAL_YOU_DARK -> {
                 ThemeManager.theme = Theme.MATERIAL_YOU_DARK
             }
+            ThemeConstants.CUSTOM -> {
+                CustomTheme.load()
+                ThemeManager.theme = Theme.CUSTOM
+            }
         }
     }
 
@@ -149,6 +154,7 @@ object ThemeUtils {
             ThemeConstants.HIGH_CONTRAST,
             ThemeConstants.SLATE,
             ThemeConstants.OIL,
+            ThemeConstants.CUSTOM,
             ThemeConstants.MATERIAL_YOU_DARK -> {
                 darkBars(window)
             }
@@ -221,6 +227,7 @@ object ThemeUtils {
             ThemeConstants.HIGH_CONTRAST,
             ThemeConstants.SLATE,
             ThemeConstants.OIL,
+            ThemeConstants.CUSTOM,
             ThemeConstants.MATERIAL_YOU_DARK -> {
                 return true
             }

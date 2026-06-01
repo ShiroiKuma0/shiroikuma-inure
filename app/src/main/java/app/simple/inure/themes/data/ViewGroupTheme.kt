@@ -4,17 +4,17 @@ import androidx.annotation.ColorInt
 
 data class ViewGroupTheme(
         @ColorInt
-        val background: Int,
+        var background: Int,
 
         @ColorInt
-        val viewerBackground: Int,
+        var viewerBackground: Int,
 
         @ColorInt
-        val highlightBackground: Int,
+        var highlightBackground: Int,
 
         @ColorInt
-        val selectedBackground: Int,
+        var selectedBackground: Int,
 
         @ColorInt
-        val dividerBackground: Int
+        var dividerBackground: Int
 )

@@ -25,4 +25,11 @@ object ThemeConstants {
 
     @RequiresApi(Build.VERSION_CODES.S)
     const val MATERIAL_YOU_DARK = 12
+
+    /**
+     * Fork: 白い熊 Inure UI — a fully user-overridable theme. Its colour roles are stored in
+     * [app.simple.inure.themes.data.CustomTheme] (seeded from [Theme.DARK]) and edited from the
+     * "白い熊 Inure UI" preferences screen.
+     */
+    const val CUSTOM = 13
 }
