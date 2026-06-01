@@ -68,6 +68,16 @@ class AdapterHome(private val list: List<Pair<Int, Int>>) : RecyclerView.Adapter
             holder.icon.setImageResource(list[position].first)
             holder.text.text = holder.itemView.context.getString(list[position].second)
 
+            // Fork (白い熊 Inure UI): main-screen icon size — scale the home menu icon (up to 3x), or the
+            // designed size when unset. Recycling-safe (base captured at holder creation).
+            run {
+                val scale = app.simple.inure.preferences.ShiroikumaUIPreferences.getMainListIconScale()
+                val lp = holder.icon.layoutParams
+                lp.width = if (scale >= 0) holder.baseIconSize * scale / 100 else holder.baseIconSize
+                lp.height = lp.width
+                holder.icon.layoutParams = lp
+            }
+
             if (AccessibilityPreferences.isColorfulIcons()) {
                 holder.icon.imageTintList = ColorStateList(arrayOf(intArrayOf(
                         android.R.attr.state_enabled
@@ -78,6 +88,27 @@ class AdapterHome(private val list: List<Pair<Int, Int>>) : RecyclerView.Adapter
 
                 if (AccessibilityPreferences.isHighlightMode()) {
                     holder.container.setHighlightColor(Colors.getColors()[position])
+                }
+            }
+
+            // Fork (白い熊 Inure UI): main-screen icon colour + label font/size/colour (overrides only when set).
+            run {
+                val prefs = app.simple.inure.preferences.ShiroikumaUIPreferences
+                if (prefs.isIconColorSet()) {
+                    holder.icon.imageTintList = ColorStateList.valueOf(prefs.getIconColor(0))
+                }
+                val family = prefs.getTextFamily()
+                val weight = prefs.getTextWeight()
+                if (family.isNotEmpty() || weight != 0) {
+                    holder.text.typeface = app.simple.inure.util.TypeFace.resolveRoleTypeface(
+                            family, weight, TypeFaceTextView.REGULAR, holder.itemView.context)
+                }
+                val textScale = prefs.getTextScale()
+                if (textScale > 0) {
+                    holder.text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, holder.baseTextSize * textScale / 100f)
+                }
+                if (prefs.isTextColorSet()) {
+                    holder.text.setTextColor(prefs.getTextColor(0))
                 }
             }
 
@@ -129,6 +160,10 @@ class AdapterHome(private val list: List<Pair<Int, Int>>) : RecyclerView.Adapter
         val icon: ThemeIcon = itemView.findViewById(R.id.adapter_app_info_menu_icon)
         val text: TypeFaceTextView = itemView.findViewById(R.id.adapter_app_info_menu_text)
         val container: DynamicRippleLinearLayoutWithFactor = itemView.findViewById(R.id.adapter_app_info_menu_container)
+
+        // Fork: base icon size + text size captured at creation (before any scaling) for the main-screen styling.
+        val baseIconSize: Int = icon.layoutParams.width
+        val baseTextSize: Float = text.textSize
 
         init {
             text.isSelected = true

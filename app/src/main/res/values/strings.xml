@@ -842,4 +842,9 @@
     <string name="custom_installer_version">Version</string>
     <string name="custom_installer_buttons">Buttons</string>
     <string name="custom_reset_installer">Reset installer styling</string>
+    <string name="custom_group_main_list">Main screen</string>
+    <string name="custom_main_icon_size">Icon size</string>
+    <string name="custom_main_icon_colour">Icon colour</string>
+    <string name="custom_main_text">Text</string>
+    <string name="custom_main_text_colour">Text colour</string>
 </resources>

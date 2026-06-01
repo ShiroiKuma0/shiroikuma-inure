@@ -20,6 +20,7 @@ import app.simple.inure.extensions.fragments.ScopedFragment
 import app.simple.inure.preferences.AppearancePreferences
 import app.simple.inure.preferences.ShiroikumaFontPreferences
 import app.simple.inure.preferences.ShiroikumaInstallerPreferences
+import app.simple.inure.preferences.ShiroikumaUIPreferences
 import app.simple.inure.themes.data.CustomTheme
 import app.simple.inure.themes.manager.ThemeManager
 import app.simple.inure.themes.manager.ThemeUtils
@@ -58,6 +59,22 @@ class ShiroikumaUIScreen : ScopedFragment() {
             TypeFace.clearFileTypefaceCache()
             render()
         }
+
+        // ---- Main screen (Home feature menu) ------------------------------------------------------------ //
+        addGroupHeader(getString(R.string.custom_group_main_list))
+        val mainAccent = AppearancePreferences.getAccentColor()
+        addIconSizeRow()
+        addColorRow(getString(R.string.custom_main_icon_colour),
+                    { ShiroikumaUIPreferences.getIconColor(mainAccent) },
+                    { ShiroikumaUIPreferences.isIconColorSet() },
+                    { ShiroikumaUIPreferences.setIconColor(it) },
+                    { ShiroikumaUIPreferences.resetIconColor() })
+        val refreshMainText = addFontElement(mainTextFontConfig(mainAccent))
+        addColorRow(getString(R.string.custom_main_text_colour),
+                    { ShiroikumaUIPreferences.getTextColor(mainAccent) },
+                    { ShiroikumaUIPreferences.isTextColorSet() },
+                    { ShiroikumaUIPreferences.setTextColor(it); refreshMainText() },
+                    { ShiroikumaUIPreferences.resetTextColor(); refreshMainText() })
 
         // ---- Colours (Custom theme) --------------------------------------------------------------------- //
         addAction(getString(R.string.custom_use_theme), activeDescription()) { useCustomTheme() }
@@ -150,6 +167,41 @@ class ShiroikumaUIScreen : ScopedFragment() {
         container.addView(row)
     }
 
+    private fun addIconSizeRow() {
+        val row = inflate(R.layout.adapter_shiroikuma_slider_row)
+        val label = row.findViewById<TypeFaceTextView>(R.id.slider_label)
+        val seek = row.findViewById<AppCompatSeekBar>(R.id.slider_seek)
+        val value = row.findViewById<TypeFaceTextView>(R.id.slider_value)
+        label.text = getString(R.string.custom_main_icon_size)
+        seek.max = ShiroikumaUIPreferences.SCALE_MAX
+
+        fun refresh() {
+            val set = ShiroikumaUIPreferences.isMainListIconScaleSet()
+            val scale = if (set) ShiroikumaUIPreferences.getMainListIconScale() else ShiroikumaUIPreferences.SCALE_DEFAULT
+            seek.progress = scale
+            value.text = if (set) "$scale%" else getString(R.string.custom_default)
+        }
+        refresh()
+
+        seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                val scale = progress.coerceAtLeast(ShiroikumaUIPreferences.SCALE_MIN)
+                ShiroikumaUIPreferences.setMainListIconScale(scale)
+                value.text = "$scale%"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+        // Tap the label to reset to the global app-icon size.
+        label.setOnClickListener {
+            ShiroikumaUIPreferences.resetMainListIconScale()
+            refresh()
+        }
+        container.addView(row)
+    }
+
     private fun addCustomThemeRow(role: CustomTheme.Role) {
         addColorRow(getString(role.labelRes),
                     { CustomTheme.effective(role) },
@@ -206,6 +258,14 @@ class ShiroikumaUIScreen : ScopedFragment() {
             effWeight = { ShiroikumaFontPreferences.effectiveWeight(role) },
             effScale = { ShiroikumaFontPreferences.effectiveScale(role) },
             previewColor = { roleThemeColor(role) },
+    )
+
+    private fun mainTextFontConfig(colorDefault: Int) = FontElementConfig(
+            label = getString(R.string.custom_main_text),
+            getFamily = { ShiroikumaUIPreferences.getTextFamily() }, setFamily = { ShiroikumaUIPreferences.setTextFamily(it) },
+            getWeight = { ShiroikumaUIPreferences.getTextWeight() }, setWeight = { ShiroikumaUIPreferences.setTextWeight(it) },
+            getScale = { ShiroikumaUIPreferences.getTextScale() }, setScale = { ShiroikumaUIPreferences.setTextScale(it) },
+            previewColor = { ShiroikumaUIPreferences.getTextColor(colorDefault) },
     )
 
     private fun installerFontConfig(item: String, label: String, colorDefault: Int) = FontElementConfig(
