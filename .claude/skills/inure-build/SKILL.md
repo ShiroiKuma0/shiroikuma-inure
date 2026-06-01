@@ -30,7 +30,7 @@ This skill runs under Claude Code, so Claude executes every step itself with the
 | Custom signing keystore | `~/.android-keystores/inure.jks` (alias `inure`, passphrase `inure123`) |
 | Output APK dir (build) | `app/build/outputs/apk/github/release/` |
 | Output APK dir (archive) | `~/tmp/` + on-device `/sdcard/tmp/` |
-| APK filename | `shiroikuma-inure_<versionName>_arm64-v8a.apk`, where versionName carries the `+N` tail, e.g. `shiroikuma-inure_build107.0.2+1_arm64-v8a.apk` (no datetime, no git sha) |
+| APK filename | `shiroikuma-inure_<versionName>_arm64-v8a.apk`, where versionName is the tag with the `build` prefix stripped plus the `+N` tail, e.g. `shiroikuma-inure_107.0.2+2_arm64-v8a.apk` (no datetime, no git sha) |
 | Build host | Tuxedo OS |
 | Build JDK | OpenJDK 21 at `/usr/lib/jvm/java-21-openjdk-amd64` |
 | Android SDK | `~/android-sdk`, platform `android-36` + build-tools `36.1.0` |
@@ -43,7 +43,11 @@ Single Android Gradle project, **Groovy** DSL. Modules `:app` (the application) 
 
 ## Side-by-side install is safe (no collisions)
 
-Coexistence is decided purely by `applicationId` (`shiroikuma.inure` vs official `app.simple.inure`). We keep `namespace = 'app.simple.inure'` — it is build-time only (R/BuildConfig package, JNI `Java_app_simple_inure_*` symbols) and never seen by the OS at install. All three manifest `<provider>` authorities use `${applicationId}` (`.provider`, `.shizuku`), so they auto-differ; there are no hardcoded authorities and no custom `<permission>` declarations. So official Inure + the fork install as two separate apps. (The only hardcoded `app.simple.inure` strings left are `taskAffinity` values — cosmetic, affecting only the recents grouping; not worth changing and left untouched for clean rebases.) Do NOT install the fork over official Inure (different signing keys → Android refuses); they coexist as distinct packages.
+Coexistence is decided purely by `applicationId` (`shiroikuma.inure` vs official `app.simple.inure`). We keep `namespace = 'app.simple.inure'` — it is build-time only (R/BuildConfig package, JNI `Java_app_simple_inure_*` symbols) and never seen by the OS at install. All three manifest `<provider>` authorities use `${applicationId}` (`.provider`, `.shizuku`), so they auto-differ.
+
+**Custom permissions MUST be namespaced (commit 3).** The terminal emulator declares three custom permissions — `RUN_SCRIPT`, `APPEND_TO_PATH`, `PREPEND_TO_PATH`. Upstream hardcodes them as `inure.terminal.permission.*` (no package prefix) in **both** `app/src/main/AndroidManifest.xml` and `app/src/github/AndroidManifest.xml`, and `Term.java` hardcodes the two PATH ones. Two apps can't declare the same permission name, so installing alongside the official app (which already owns them) fails with **`INSTALL_FAILED_DUPLICATE_PERMISSION`**. Commit 3 prefixes all three with `${applicationId}` in both manifests and derives `Term.java`'s constants from `BuildConfig.APPLICATION_ID`, so each package owns its own (`shiroikuma.inure.terminal.permission.*`). This is required for side-by-side install — see commit 3.
+
+(The only hardcoded `app.simple.inure` strings left are `taskAffinity` values — cosmetic, affecting only recents grouping; not worth changing and left untouched for clean rebases.) Do NOT install the fork over official Inure (different signing keys → Android refuses); they coexist as distinct packages.
 
 ## Branch / remote model
 
@@ -102,6 +106,17 @@ Leave `namespace`, the `play` flavor's `applicationIdSuffix ".play"`, and the `r
 
 (The `github` flavor does not override `app_name`, so it inherits this. The `play` flavor has its own copy still reading "Inure"; we don't build `play`, so leave it.)
 
+(Commit 2 on `custom` is `Add Claude Code build/sync skills and fork docs` — the `.claude/skills/` + `CLAUDE.md` tooling, not an app customization.)
+
+### Commit 3 — `Namespace terminal permissions per applicationId`
+
+Required for side-by-side install (see "Side-by-side install" above). Three files. Logically part of commit 1; kept separate for now, fold into commit 1 on a future history cleanup.
+
+- `app/src/main/AndroidManifest.xml` and `app/src/github/AndroidManifest.xml`: every `inure.terminal.permission.X` → `${applicationId}.terminal.permission.X` (the three `<permission android:name=…>` declarations + the `android:permission=…` guard on the remote-script activity). Both manifests must match — the merger keeps any that differ, so a missed one re-introduces the collision.
+- `app/src/main/java/app/simple/inure/terminal/Term.java`: the two `PERMISSION_PATH_*` constants → `app.simple.inure.BuildConfig.APPLICATION_ID + ".terminal.permission.…"` so the runtime value matches the manifest's substituted `${applicationId}.*`. (`BuildConfig.APPLICATION_ID` is `shiroikuma.inure`; the `inure.terminal.broadcast.*` **action** strings are left alone — actions don't collide.)
+
+Symptom if this regresses on a rebase: `INSTALL_FAILED_DUPLICATE_PERMISSION: … already owned by app.simple.inure[.play]`.
+
 ### Future feature commits
 
 Append small, surgical commits on top of commit 1 so rebases stay trivial; `namespace` stays unchanged in all of them. Document notable ones here as the stack grows (mirroring how the appmanager / futokxkb skills list their feature commits).
@@ -110,10 +125,11 @@ Append small, surgical commits on top of commit 1 so rebases stay trivial; `name
 
 The build.gradle edit above reads the version from `-P` properties, so **no per-build commit is needed**:
 
-- **Base name** = the tracked Inure release tag, e.g. `build107.0.2` (= the tag `custom` is rebased onto; `git describe --tags --abbrev=0` on `custom`).
+- **Base tag** = the tracked Inure release tag, e.g. `build107.0.2` (= the tag `custom` is rebased onto; `git describe --tags --abbrev=0` on `custom`). This is what **keys the counter**.
+- **Display name** = the base tag with the leading `build` stripped (`${base_tag#build}`) → `107.0.2`. Cosmetic; used only for the versionName and the APK filename. (Stripping the prefix does **not** reset the counter, because the counter is keyed on the full tag, not the display name.)
 - **Base code** = upstream's own versionCode for that tag, read with `git show <tag>:app/build.gradle` (e.g. `build107.0.2` → `10702`). Inure's codes are 5 digits derived from the build number.
-- **N** = per-build iteration, from a local counter file `~/tmp/.shiroikuma_inure_build` (one line: `<base_name> <N>`). Increment on each **successful** build; **reset to 1 when the base changes** (new upstream tag). Consumed only on success.
-- **versionName** = `<base_name>+<N>` → `build107.0.2+1`, `build107.0.2+2`, … (`+` is legal in Android versionName and on ext4/FAT/`adb push`/GitHub assets — leave it unescaped).
+- **N** = per-build iteration, from a local counter file `~/tmp/.shiroikuma_inure_build` (one line: `<base_tag> <N>`). Increment on each **successful** build; **reset to 1 when the base tag changes** (new upstream tag). Consumed only on success.
+- **versionName** = `<display_name>+<N>` → `107.0.2+1`, `107.0.2+2`, … (`+` is legal in Android versionName and on ext4/FAT/`adb push`/GitHub assets — leave it unescaped).
 - **versionCode** = `<base_code> * 10000 + N` → `107020001`, `107020002`, … This is far above the official app's code (`10702`) so Android always sees our build as newer, with 9999 builds of headroom per base; rebasing onto a newer tag raises the base so we stay ahead.
 - Inject at the gradlew call: `-PshiroikumaVersionName="$our_name" -PshiroikumaVersionCode="$our_code"`.
 
@@ -176,15 +192,17 @@ SIGNING_KEY_ALIAS=inure
 SIGNING_KEY_PASSWORD=inure123
 EOF
 
-# version: base name = nearest tag on custom; base code = that tag's upstream versionCode;
-# N from the local counter (resets when the base tag changes)
-base_name=$(git describe --tags --abbrev=0)
-base_code=$(git show "$base_name:app/build.gradle" | grep -oE 'versionCode[[:space:]]+[0-9]+' | grep -oE '[0-9]+$')
+# version: base tag = nearest tag on custom (keys the counter); display name = tag minus the
+# "build" prefix; base code = that tag's upstream versionCode; N from the local counter (resets
+# only when the base TAG changes, not when the prefix is stripped)
+base_tag=$(git describe --tags --abbrev=0)
+disp_name="${base_tag#build}"                     # build107.0.2 -> 107.0.2
+base_code=$(git show "$base_tag:app/build.gradle" | grep -oE 'versionCode[[:space:]]+[0-9]+' | grep -oE '[0-9]+$')
 counter="$HOME/tmp/.shiroikuma_inure_build"
 stored_name=""; stored_n=0
 [ -f "$counter" ] && read stored_name stored_n < "$counter"
-if [ "$stored_name" = "$base_name" ]; then N=$((stored_n + 1)); else N=1; fi
-our_name="${base_name}+${N}"
+if [ "$stored_name" = "$base_tag" ]; then N=$((stored_n + 1)); else N=1; fi
+our_name="${disp_name}+${N}"                       # 107.0.2+2
 our_code=$(( base_code * 10000 + N ))
 apk_name="shiroikuma-inure_${our_name}_arm64-v8a.apk"
 echo "Will produce: $apk_name (versionCode $our_code)"
@@ -198,7 +216,7 @@ build_ok=0
   --console=plain && build_ok=1
 
 if [ "$build_ok" = 1 ]; then
-  echo "$base_name $N" > "$counter"            # consume the build number only on success
+  echo "$base_tag $N" > "$counter"             # consume the build number only on success (keyed on the tag)
   built=$(ls -t app/build/outputs/apk/github/release/*.apk | head -1)
   mkdir -p ~/tmp && cp "$built" ~/tmp/"$apk_name"   # local backup, unconditional
   ls -lh ~/tmp/"$apk_name"

@@ -92,7 +92,7 @@ Don't push through a significant rebase just to "get it building" — a silently
 
 ## Step 4 — Build the new APK (apply the inure-build pipeline)
 
-Build directly with Bash per **inure-build**'s "Build + sign + deploy pipeline". The version counter **resets to N=1** automatically because the base tag changed → versionName `<new-tag>+1`. There are no submodules to init.
+Build directly with Bash per **inure-build**'s "Build + sign + deploy pipeline". The version counter **resets to N=1** automatically because the base tag changed → versionName `<new-tag with the "build" prefix stripped>+1` (e.g. a new `build107.0.3` tag → `107.0.3+1`). There are no submodules to init.
 
 - If the build **fails on the rebase result** (a compile error in code our commits touch), treat it like a significant conflict: diagnose, and if it stems from the rebase, replan with the user rather than patching blindly.
 - Toolchain reminders: JDK 21, SDK platform-36 / build-tools 36.1.0, and `-PshiroikumaNdk='29.0.14206865'` (upstream's pinned RC NDK is not installable). `./gradlew --stop` if a stale daemon picked the wrong JVM.
@@ -117,4 +117,5 @@ Then **update the docs to the new base**: the version examples and the `build107
 ## Reference — conflict watch-points (condensed from inure-build)
 
 - **Commit 1** (`Customize for shiroikuma side-by-side install`): `app/build.gradle` `defaultConfig` — `applicationId "shiroikuma.inure"`, the `-P`-driven `versionCode`/`versionName` block (conflicts on upstream's literal version bump every release → keep ours), the `ndk { abiFilters 'arm64-v8a' }` block; and the overridable `ndkVersion` line; plus `non_translatable_string.xml` `app_name` → `白い熊 Inure`. Leave `namespace`, the `play` flavor suffix, and `resValue "string", "versionName", versionName` untouched.
+- **Commit 3** (`Namespace terminal permissions per applicationId`): the `${applicationId}.terminal.permission.*` names in **both** `app/src/main/AndroidManifest.xml` and `app/src/github/AndroidManifest.xml`, plus the `BuildConfig.APPLICATION_ID`-derived constants in `Term.java`. Conflicts only if upstream edits those manifest lines or the `Term.java` constants; keep ours in both manifests (a missed one re-introduces `INSTALL_FAILED_DUPLICATE_PERMISSION`). Required for side-by-side install.
 - **General rule:** if conflicts feel non-trivial, re-derive commit 1 from inure-build rather than fighting the merge; for any future feature commit, take the "significant → plan with the user" path.
