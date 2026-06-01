@@ -11,6 +11,7 @@ import android.graphics.text.LineBreaker
 import android.os.Build
 import android.text.Layout
 import android.util.AttributeSet
+import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.widget.TextViewCompat
 import app.simple.inure.R
@@ -18,6 +19,7 @@ import app.simple.inure.preferences.AppearancePreferences
 import app.simple.inure.preferences.AppearancePreferences.getAppFont
 import app.simple.inure.preferences.BehaviourPreferences
 import app.simple.inure.preferences.DevelopmentPreferences
+import app.simple.inure.preferences.ShiroikumaFontPreferences
 import app.simple.inure.themes.interfaces.ThemeChangedListener
 import app.simple.inure.themes.manager.Theme
 import app.simple.inure.themes.manager.ThemeManager
@@ -42,10 +44,16 @@ open class TypeFaceTextView : AppCompatTextView, ThemeChangedListener, SharedPre
     private var isDrawableHidden = true
     private var lastDrawableColor = Color.GRAY
 
+    // Fork (白い熊 Inure UI): the view's designed weight (from appFontStyle) and original text size, used as
+    // the base that per-role font overrides build on.
+    private var baseFontStyle = BOLD
+    private var baseTextSizePx = 0f
+
     var fontStyle = MEDIUM
         set(value) {
             field = value
-            typeface = TypeFace.getTypeFace(getAppFont(), field, context)
+            baseFontStyle = value
+            applyFont()
         }
 
     constructor(context: Context) : super(context) {
@@ -65,8 +73,9 @@ open class TypeFaceTextView : AppCompatTextView, ThemeChangedListener, SharedPre
 
     private fun init() {
         if (isInEditMode) return
-        typeface = TypeFace.getTypeFace(getAppFont(), typedArray.getInt(R.styleable.TypeFaceTextView_appFontStyle, BOLD), context)
+        baseFontStyle = typedArray.getInt(R.styleable.TypeFaceTextView_appFontStyle, BOLD)
         colorMode = typedArray.getInt(R.styleable.TypeFaceTextView_textColorStyle, 1)
+        applyFont()
         drawableTintMode = typedArray.getInt(R.styleable.TypeFaceTextView_drawableTintStyle, 1)
         isDrawableHidden = typedArray.getBoolean(R.styleable.TypeFaceTextView_isDrawableHidden, true)
 
@@ -102,6 +111,37 @@ open class TypeFaceTextView : AppCompatTextView, ThemeChangedListener, SharedPre
                     ellipsize = null
                 }
             }
+        }
+    }
+
+    /** Fork: map the colour-style bucket to a font role (accent/white/black fall back to DEFAULT). */
+    private fun fontRole(): String = when (colorMode) {
+        0 -> ShiroikumaFontPreferences.HEADING
+        1 -> ShiroikumaFontPreferences.PRIMARY
+        2 -> ShiroikumaFontPreferences.SECONDARY
+        3 -> ShiroikumaFontPreferences.TERTIARY
+        4 -> ShiroikumaFontPreferences.QUATERNARY
+        else -> ShiroikumaFontPreferences.DEFAULT
+    }
+
+    /**
+     * Fork: apply the per-role font (family/weight) and size-scale. When everything inherits, this is exactly
+     * the stock behaviour — the app font at the view's designed weight, with the view's designed size.
+     */
+    private fun applyFont() {
+        if (isInEditMode) return
+        val role = fontRole()
+        val family = ShiroikumaFontPreferences.effectiveFamily(role)
+        val weight = ShiroikumaFontPreferences.effectiveWeight(role)
+        typeface = if (family.isEmpty() && weight == 0) {
+            TypeFace.getTypeFace(getAppFont(), baseFontStyle, context)
+        } else {
+            TypeFace.resolveRoleTypeface(family, weight, baseFontStyle, context)
+        }
+        if (baseTextSizePx <= 0f) baseTextSizePx = textSize
+        if (baseTextSizePx > 0f) {
+            val scale = ShiroikumaFontPreferences.effectiveScale(role)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, if (scale > 0) baseTextSizePx * scale / 100f else baseTextSizePx)
         }
     }
 
@@ -353,10 +393,15 @@ open class TypeFaceTextView : AppCompatTextView, ThemeChangedListener, SharedPre
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            AppearancePreferences.ACCENT_COLOR -> {
+        when {
+            key == AppearancePreferences.ACCENT_COLOR -> {
                 setTextColor(animate = true)
                 setDrawableTint(animate = true)
+            }
+            // Fork (白い熊 Inure UI): a per-role font change -> re-resolve typeface + size live.
+            key != null && key.startsWith(ShiroikumaFontPreferences.PREFIX) -> {
+                TypeFace.clearFileTypefaceCache()
+                applyFont()
             }
         }
     }

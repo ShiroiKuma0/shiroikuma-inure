@@ -2,9 +2,12 @@ package app.simple.inure.util
 
 import android.content.Context
 import android.graphics.Typeface
+import android.os.Build
 import androidx.core.content.res.ResourcesCompat
 import app.simple.inure.R
 import app.simple.inure.preferences.AppearancePreferences
+import app.simple.inure.preferences.ShiroikumaFontPreferences
+import java.io.File
 
 object TypeFace {
 
@@ -593,6 +596,51 @@ object TypeFace {
         }
 
         return typeface
+    }
+
+    // ---- Fork (白い熊 Inure UI): external font files + per-role resolution -------------------------------- //
+
+    private val fileTypefaceCache = HashMap<String, Typeface?>()
+
+    fun typefaceFromFile(path: String): Typeface? {
+        if (fileTypefaceCache.containsKey(path)) return fileTypefaceCache[path]
+        val tf = runCatching {
+            val f = File(path)
+            if (f.exists()) Typeface.createFromFile(f) else null
+        }.getOrNull()
+        fileTypefaceCache[path] = tf
+        return tf
+    }
+
+    fun clearFileTypefaceCache() = fileTypefaceCache.clear()
+
+    /** Map a 100–900 weight onto one of the four bundled weight buckets (light/regular/medium/bold). */
+    private fun weightToStyle(weight: Int): Int = when {
+        weight <= 300 -> 0
+        weight <= 400 -> 1
+        weight <= 500 -> 2
+        else -> 3
+    }
+
+    /**
+     * Resolve a typeface for a per-role override. [family] may be a bundled code name, a `file:<path>` for an
+     * imported font, or empty (→ the global app font). [weight] 0 means "use [baseStyle]"; a real 100–900
+     * weight maps to a bucket and, on API 28+, is additionally synthesised via [Typeface.create].
+     */
+    fun resolveRoleTypeface(family: String, weight: Int, baseStyle: Int, context: Context): Typeface? {
+        val style = if (weight != 0) weightToStyle(weight) else baseStyle
+        val base: Typeface? = when {
+            family.startsWith(ShiroikumaFontPreferences.FILE_PREFIX) ->
+                typefaceFromFile(family.removePrefix(ShiroikumaFontPreferences.FILE_PREFIX))
+                    ?: getTypeFace(AppearancePreferences.getAppFont(), style, context)
+            family.isNotEmpty() -> getTypeFace(family, style, context)
+            else -> getTypeFace(AppearancePreferences.getAppFont(), style, context)
+        }
+        return if (weight != 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && base != null) {
+            Typeface.create(base, weight, false)
+        } else {
+            base
+        }
     }
 
     fun getBoldTypeFace(context: Context): Typeface? {
