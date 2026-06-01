@@ -207,9 +207,12 @@ our_code=$(( base_code * 10000 + N ))
 apk_name="shiroikuma-inure_${our_name}_arm64-v8a.apk"
 echo "Will produce: $apk_name (versionCode $our_code)"
 
-# build github/release/arm64, signed by AGP
+# build github/release/arm64, signed by AGP.
+# NOTE: invoke via `sh ./gradlew` — upstream commits gradlew as mode 644 (non-executable), so a bare
+# `./gradlew` fails with "Permission denied" (rc 126). `sh ./gradlew` needs no +x and leaves the file
+# mode untouched (a chmod +x would show as a spurious tracked change / rebase noise). Do NOT chmod it.
 build_ok=0
-./gradlew :app:assembleGithubRelease \
+sh ./gradlew :app:assembleGithubRelease \
   -PshiroikumaVersionName="$our_name" \
   -PshiroikumaVersionCode="$our_code" \
   -PshiroikumaNdk='29.0.14206865' \
@@ -227,7 +230,8 @@ fi
 
 - If the build fails on the NDK (`Failed to find NDK … 29.0.13599879`), confirm `-PshiroikumaNdk` points at an installed NDK (`ls ~/android-sdk/ndk/`).
 - If it fails on signing being skipped (unsigned APK), `local.properties` wasn't written or `KEYSTORE_PATH` is wrong — the APK won't install. Regenerate it.
-- A stale Gradle daemon on the wrong JVM: `./gradlew --stop` then rebuild.
+- `./gradlew: Permission denied` (rc 126): gradlew is committed mode 644 — use `sh ./gradlew` (as above), don't `chmod +x` (that pollutes the tree).
+- A stale Gradle daemon on the wrong JVM: `sh ./gradlew --stop` then rebuild.
 
 ## adb push (the standing rule — ask, then wait for "Push")
 
