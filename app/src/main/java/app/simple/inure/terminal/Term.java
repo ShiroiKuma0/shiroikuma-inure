@@ -117,8 +117,11 @@ public class Term extends BaseActivity implements UpdateCallback,
     private static final String ACTION_CLOSE = "inure.terminal.close";
     private static final String ACTION_PATH_BROADCAST = "inure.terminal.broadcast.APPEND_TO_PATH";
     private static final String ACTION_PATH_PREPEND_BROADCAST = "inure.terminal.broadcast.PREPEND_TO_PATH";
-    private static final String PERMISSION_PATH_BROADCAST = "inure.terminal.permission.APPEND_TO_PATH";
-    private static final String PERMISSION_PATH_PREPEND_BROADCAST = "inure.terminal.permission.PREPEND_TO_PATH";
+    // Fork: namespaced per applicationId so the fork (shiroikuma.inure) does not redeclare a
+    // permission already owned by the official app.simple.inure[.play] -> avoids
+    // INSTALL_FAILED_DUPLICATE_PERMISSION. Must match the ${applicationId}.* names in the manifest.
+    private static final String PERMISSION_PATH_BROADCAST = app.simple.inure.BuildConfig.APPLICATION_ID + ".terminal.permission.APPEND_TO_PATH";
+    private static final String PERMISSION_PATH_PREPEND_BROADCAST = app.simple.inure.BuildConfig.APPLICATION_ID + ".terminal.permission.PREPEND_TO_PATH";
     private int pendingPathBroadcasts = 0;
     
     private BroadcastReceiver closeBroadcastReceiver;
