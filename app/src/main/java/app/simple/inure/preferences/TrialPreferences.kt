@@ -53,8 +53,7 @@ object TrialPreferences {
     }
 
     inline fun isAppFullVersionEnabled(): Boolean {
-        return SharedPreferences.getEncryptedSharedPreferences().getBoolean(IS_APP_FULL_VERSION_ENABLED, false) ||
-                CalendarUtils.getDaysBetweenTwoDates(Date(getFirstLaunchDate()), CalendarUtils.getToday()) <= MAX_TRIAL_DAYS
+        return true // Fork: full version always enabled (the Play unlocker is package/signature-bound to the official app.simple.inure and can't activate this renamed fork).
     }
 
     fun isWithinTrialPeriod(): Boolean {
@@ -67,7 +66,7 @@ object TrialPreferences {
     }
 
     fun isFullVersion(): Boolean {
-        return SharedPreferences.getEncryptedSharedPreferences().getBoolean(IS_APP_FULL_VERSION_ENABLED, false)
+        return true // Fork: full version always enabled (see isAppFullVersionEnabled).
     }
 
     // ---------------------------------------------------------------------------------------------------------- //
@@ -104,7 +103,7 @@ object TrialPreferences {
     }
 
     fun hasLicenceKey(): Boolean {
-        return SharedPreferences.getEncryptedSharedPreferences().getBoolean(HAS_LICENSE_KEY, false)
+        return true // Fork: take the clean "licence key mode" UI path on the splash screen; no unlocker dependency, no deactivation warning.
     }
 
     // ---------------------------------------------------------------------------------------------------------- //
@@ -114,7 +113,7 @@ object TrialPreferences {
     }
 
     fun isUnlockerVerificationRequired(): Boolean {
-        return SharedPreferences.getEncryptedSharedPreferences().getBoolean(IS_UNLOCKER_VERIFICATION_REQUIRED, true) || AppUtils.isPlayFlavor()
+        return false // Fork: never round-trip to the unlocker (it won't answer a renamed package -> "Checking license" hang).
     }
 
     // ---------------------------------------------------------------------------------------------------------- //
