@@ -110,7 +110,7 @@ Leave `namespace`, the `play` flavor's `applicationIdSuffix ".play"`, and the `r
 
 ### Commit 3 — `Namespace terminal permissions per applicationId`
 
-Required for side-by-side install (see "Side-by-side install" above). Three files. Logically part of commit 1; kept separate for now, fold into commit 1 on a future history cleanup.
+Required for side-by-side install (see "Side-by-side install" above). Three files. A separate commit on top of commit 1.
 
 - `app/src/main/AndroidManifest.xml` and `app/src/github/AndroidManifest.xml`: every `inure.terminal.permission.X` → `${applicationId}.terminal.permission.X` (the three `<permission android:name=…>` declarations + the `android:permission=…` guard on the remote-script activity). Both manifests must match — the merger keeps any that differ, so a missed one re-introduces the collision.
 - `app/src/main/java/app/simple/inure/terminal/Term.java`: the two `PERMISSION_PATH_*` constants → `app.simple.inure.BuildConfig.APPLICATION_ID + ".terminal.permission.…"` so the runtime value matches the manifest's substituted `${applicationId}.*`. (`BuildConfig.APPLICATION_ID` is `shiroikuma.inure`; the `inure.terminal.broadcast.*` **action** strings are left alone — actions don't collide.)
