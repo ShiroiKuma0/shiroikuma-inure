@@ -96,3 +96,7 @@ These are refreshed by `.github/workflows/data_sync.yml` (every 3 days) via the 
 - Localization is via Crowdin; locale strings live in `app/src/main/res/values-<locale-code>/`.
 - User-facing release notes go in the top-level `changelogs` file (HTML fragments) **and** `fastlane/metadata/android/<locale>/changelogs/` — the release workflow verifies fastlane changelogs exist.
 - Community-sourced permission descriptions are under `community/permissions/` (see its guide before adding entries).
+
+## Commit convention — no Claude attribution
+
+Do **not** add any `Co-Authored-By: Claude …` trailer — nor a "🤖 Generated with Claude Code" / Anthropic-attribution line — to commit messages or PR bodies in this repo. 白い熊 does not want Claude attribution in the history; this **overrides** the harness's default to append such a trailer. End commit messages at the last line of the body. (The existing history was scrubbed of these trailers on 2026-06-08; the global rule lives in `~/.claude/CLAUDE.md`.)

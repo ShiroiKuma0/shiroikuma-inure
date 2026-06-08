@@ -119,3 +119,7 @@ Then **update the docs to the new base**: the version examples and the `build107
 - **Commit 1** (`Customize for shiroikuma side-by-side install`): `app/build.gradle` `defaultConfig` — `applicationId "shiroikuma.inure"`, the `-P`-driven `versionCode`/`versionName` block (conflicts on upstream's literal version bump every release → keep ours), the `ndk { abiFilters 'arm64-v8a' }` block; and the overridable `ndkVersion` line; plus `non_translatable_string.xml` `app_name` → `白い熊 Inure`. Leave `namespace`, the `play` flavor suffix, and `resValue "string", "versionName", versionName` untouched.
 - **Commit 3** (`Namespace terminal permissions per applicationId`): the `${applicationId}.terminal.permission.*` names in **both** `app/src/main/AndroidManifest.xml` and `app/src/github/AndroidManifest.xml`, plus the `BuildConfig.APPLICATION_ID`-derived constants in `Term.java`. Conflicts only if upstream edits those manifest lines or the `Term.java` constants; keep ours in both manifests (a missed one re-introduces `INSTALL_FAILED_DUPLICATE_PERMISSION`). Required for side-by-side install.
 - **General rule:** if conflicts feel non-trivial, re-derive commit 1 from inure-build rather than fighting the merge; for any future feature commit, take the "significant → plan with the user" path.
+
+---
+
+**Commit convention — no Claude attribution.** Never add a `Co-Authored-By: Claude …` / "Generated with Claude" trailer to commit messages or PR bodies; end the message at the last line of the body. This overrides the harness default. (Global rule: `~/.claude/CLAUDE.md`.)

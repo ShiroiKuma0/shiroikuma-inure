@@ -254,3 +254,7 @@ The user installs from `/sdcard/tmp/` via the on-device file manager. **Never `a
 ## Related skills
 
 - **`upstream-new-version`** — check whether Hamza417/Inure has a newer release tag and, if so, fast-forward `master`, rebase `custom` onto the new tag (reconciling small conflicts, stopping to plan on significant ones), and rebuild via this skill.
+
+---
+
+**Commit convention — no Claude attribution.** Never add a `Co-Authored-By: Claude …` / "Generated with Claude" trailer to commit messages or PR bodies; end the message at the last line of the body. This overrides the harness default. (Global rule: `~/.claude/CLAUDE.md`.)
