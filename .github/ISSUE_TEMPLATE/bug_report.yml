@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug or a functional problem in the app.
+description: Report a bug or a functional problem in 白い熊 Inure.
 title: "[Bug] Your Title Here"
 labels: [ bug ]
 
@@ -75,7 +75,7 @@ body:
         attributes:
             label: Privilege Method
             description: |
-                Please confirm the method you are using to do actions in the app:
+                Please confirm the method you are using to do actions in 白い熊 Inure:
             options:
                 -   label: Root
                     required: false
