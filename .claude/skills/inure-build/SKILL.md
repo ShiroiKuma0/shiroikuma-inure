@@ -11,7 +11,7 @@ The fork model is identical to 白い熊's other Android forks (AppManager, futo
 
 ## Operating mode — Claude Code, direct Bash
 
-This skill runs under Claude Code, so Claude executes every step itself with the Bash tool. **Do NOT use the copy-paste shell-block formatting** (the `r()` stderr helper, cyan `>>>` echoes, `read -p` pause gates) that the older claude.ai-era sister skills carry — those were for a human pasting into a terminal. Run commands directly, report results, and use the **AskUserQuestion** UI for the one human gate (adb push). Claude Code's non-interactive shell does **not** source the user's profile, so `JAVA_HOME` / `ANDROID_HOME` must be exported in every build invocation (see the pipeline).
+This skill runs under Claude Code, so Claude executes every step itself with the Bash tool. **Do NOT use the copy-paste shell-block formatting** (the `r()` stderr helper, cyan `>>>` echoes, `read -p` pause gates) that the older claude.ai-era sister skills carry — those were for a human pasting into a terminal. Run commands directly and report results; deliver the finished build **automatically** via the global **`/after-build`** skill (no transfer prompt — see "Deliver the build" below). Claude Code's non-interactive shell does **not** source the user's profile, so `JAVA_HOME` / `ANDROID_HOME` must be exported in every build invocation (see the pipeline).
 
 ## Project identity
 
@@ -238,18 +238,11 @@ fi
 - `./gradlew: Permission denied` (rc 126): gradlew is committed mode 644 — use `sh ./gradlew` (as above), don't `chmod +x` (that pollutes the tree).
 - A stale Gradle daemon on the wrong JVM: `sh ./gradlew --stop` then rebuild.
 
-## adb push (the standing rule — ask, then wait for "Push")
+## Deliver the build (the standing rule — auto, no prompt)
 
-On a successful build the APK is already in `~/tmp/`. **Ask via the AskUserQuestion UI** whether to push it to the phone — every build, never auto-push. Only when the user says to push ("Push"):
+On a successful build the APK is already in `~/tmp/`. Deliver it **automatically** by invoking the global **`/after-build`** skill — every build, never ask. `/after-build` runs `/adb-check` (UNSANDBOXED — a sandboxed check falsely reports no device), then `/adb-push` to `/sdcard/tmp/` if the phone is connected, otherwise `/scp` to `skhw:~/tmp/`, announcing the filename that landed. Never prompt "is the phone connected?" or whether to transfer — `/after-build` decides and acts on its own.
 
-```bash
-adb devices
-adb shell mkdir -p /sdcard/tmp
-adb push ~/tmp/"$apk_name" /sdcard/tmp/"$apk_name"
-adb shell ls -l /sdcard/tmp/"$apk_name"   # confirm the size matches ~/tmp
-```
-
-The user installs from `/sdcard/tmp/` via the on-device file manager. **Never `adb install` / `adb uninstall`.** If the cable is absent, the `~/tmp/` copy is the fallback (KDE Connect / Bluetooth).
+The user installs from `/sdcard/tmp/` (or `skhw:~/tmp/`) via the on-device file manager. **Never `adb install` / `adb uninstall`.**
 
 ## Related skills
 

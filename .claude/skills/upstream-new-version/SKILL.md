@@ -9,7 +9,7 @@ One-command upstream sync for 白い熊's `shiroikuma.inure` fork: **check → (
 
 ## The one discipline that overrides everything: don't push to GitHub until the user says so
 
-The entire rebase + build happens on the **local** working tree as a scratchpad. **No `git push` — not `master`, not `custom` — until the user explicitly tells you to push to the remote.** A rebase rewrites local `custom` history and is freely re-runnable (`git rebase --abort`, or reset to `origin/custom`) right up until that point. Build and let the user test on-device first. (The build's `adb push` to the phone is a separate, also user-gated step — pushing to the device is fine on the user's go-ahead; pushing to GitHub is the thing held back.)
+The entire rebase + build happens on the **local** working tree as a scratchpad. **No `git push` — not `master`, not `custom` — until the user explicitly tells you to push to the remote.** A rebase rewrites local `custom` history and is freely re-runnable (`git rebase --abort`, or reset to `origin/custom`) right up until that point. Build and let the user test on-device first. (Delivery of the build to the phone is separate and **automatic** — `/after-build` pushes/scp's it without asking; only pushing to GitHub is held back.)
 
 ## Step 0 — Preconditions
 
@@ -99,7 +99,7 @@ Build directly with Bash per **inure-build**'s "Build + sign + deploy pipeline".
 
 ## Step 5 — User tests on-device
 
-On a successful build, **ask via AskUserQuestion** whether to `adb push` to the phone (the inure-build "adb push" rule); on the user's go-ahead, push to `/sdcard/tmp/`. Then **wait** — the user installs over the previous fork build (same signing key → in-place update) and verifies the customizations still work on the new base. They may report regressions from the upstream bump; iterate locally (more edits, rebuild) — still no push to GitHub.
+On a successful build, deliver it **automatically** via the global **`/after-build`** skill (the inure-build "Deliver the build" rule) — no transfer prompt: it runs `/adb-check` UNSANDBOXED then `/adb-push` to `/sdcard/tmp/` if the phone is connected, else `/scp` to `skhw`, announcing what landed. Then **wait** — the user installs over the previous fork build (same signing key → in-place update) and verifies the customizations still work on the new base. They may report regressions from the upstream bump; iterate locally (more edits, rebuild) — still no push to GitHub.
 
 ## Step 6 — Only when the user says to push to GitHub
 
